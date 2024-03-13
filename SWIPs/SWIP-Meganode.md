@@ -304,6 +304,7 @@ Initial implementation of datamarket with auctions implementation
 
 ```solidity
 // SPDX-License-Identifier: MIT
+// Written by @tfius 
 pragma solidity ^0.8.0;
 
 contract DataMarket {
@@ -354,12 +355,20 @@ contract DataMarket {
         emit AuctionStarted(_dataHash, _startPrice, _lowestPrice, block.number, block.number + (2 * epochLength));
     }
 
+    function isThereAuctionFor(bytes32 _dataHash) external view returns (bool) {
+        return auctions[_dataHash].meganode != address(0);
+    }
+
+    function getAuctionDetails(bytes32 _dataHash) external view returns (Auction memory) {
+        return auctions[_dataHash];
+    }
+
     // Function to place a bid
     function placeBid(bytes32 _dataHash) external payable {
         Auction storage auction = auctions[_dataHash];
         require(block.number < auction.endBlock, "Auction has ended");
         require(msg.value >= auction.lowestPrice, "Bid must be at least the lowest price");
-        require(msg.value > auction.highestBid, "There is already a higher or equal bid");
+        require(msg.value > auction.highestBid, "There's already a higher or equal bid");
         
         // Return the previous highest bid
         if (auction.highestBidder != address(0)) {
@@ -417,4 +426,5 @@ contract DataMarket {
         emit AuctionCancelled(_dataHash);
     }
 }
+
 ```
